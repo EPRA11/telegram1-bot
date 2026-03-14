@@ -4,10 +4,10 @@ import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes, CommandHandler
 
-# التوكن الجديد الخاص بك
+# التوكن الخاص بك
 TOKEN = "8644900793:AAE5CTvAJUz0YdO2HyRjVpID7XLf3ro_Uu8"
 
-# إعدادات تجاوز قيود المنصات
+# إعدادات المحرك لضمان جودة عالية وتجاوز الحظر
 YDL_OPTIONS = {
     "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
     "outtmpl": "downloads/%(title).50s_%(id)s.%(ext)s",
@@ -22,7 +22,6 @@ YDL_OPTIONS = {
 
 # دالة الترحيب عند الضغط على /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # جلب اسم المستخدم (الاسم الأول)
     user_name = update.effective_user.first_name
     
     welcome_text = (
@@ -35,15 +34,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "وسأقوم بإرسال الفيديو لك مباشرة بجودة عالية."
     )
     
-    # أزرار شفافة أسفل الرسالة الترحيبية
+    # إضافة حساب المطور الخاص بك وقناة التحديثات
     keyboard = [
         [InlineKeyboardButton("قناة التحديثات 📢", url="https://t.me/TN_CITY")],
-        [InlineKeyboardButton("المطور 👨‍💻", url="https://t.me/YourUsername")] # استبدل YourUsername بيوزرك إذا أردت
+        [InlineKeyboardButton("المطور 👨‍💻", url="https://t.me/epr_a")]
     ]
     
     await update.message.reply_text(
         welcome_text, 
-        reply_markup=InlineKeyboardMarkup(keyboard)
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode="Markdown"
     )
 
 async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -61,7 +61,8 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         with open(file_path, "rb") as video:
             await update.message.reply_video(
                 video=video, 
-                caption=f"✅ تم التحميل بنجاح!\n📌: {info.get('title', 'Video')}"
+                caption=f"✅ **تم التحميل بنجاح!**\n\n📌: {info.get('title', 'فيديو')}",
+                parse_mode="Markdown"
             )
         
         if os.path.exists(file_path):
@@ -69,14 +70,13 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await status_msg.delete()
 
     except Exception as e:
-        await status_msg.edit_text(f"❌ حدث خطأ: {str(e)[:100]}")
+        await status_msg.edit_text(f"❌ **حدث خطأ:**\n`{str(e)[:100]}`", parse_mode="Markdown")
 
 if __name__ == "__main__":
     app = ApplicationBuilder().token(TOKEN).build()
     
-    # إضافة الأوامر
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_video))
     
-    print("البوت يعمل الآن بنجاح...")
+    print("Bot is running with Developer @epr_a context...")
     app.run_polling()
