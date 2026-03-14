@@ -20,9 +20,9 @@ YDL_OPTIONS = {
     },
 }
 
-# دالة الترحيب عند الضغط على /start
+# دالة الترحيب عند الضغط على /start (تم إزالة قناة التحديثات)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_name = update.effective_user.first_name
+    user_name = update.effective_user.first_name [cite: 1]
     
     welcome_text = (
         f"أهلاً بك يا {user_name}! ✨\n\n"
@@ -34,10 +34,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "وسأقوم بإرسال الفيديو لك مباشرة بجودة عالية."
     )
     
-    # إضافة حساب المطور الخاص بك وقناة التحديثات
+    # الإبقاء فقط على زر المطور @epr_a
     keyboard = [
-        [InlineKeyboardButton("قناة التحديثات 📢", url="https://t.me/TN_CITY")],
-        [InlineKeyboardButton("المطور 👨‍💻", url="https://t.me/epr_a")]
+        [InlineKeyboardButton("المطور 👨‍💻", url="https://t.me/epr_a")] [cite: 1]
     ]
     
     await update.message.reply_text(
@@ -47,36 +46,36 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    url = update.message.text
-    status_msg = await update.message.reply_text("جاري التحميل... يرجى الانتظار ⏳")
+    url = update.message.text [cite: 1]
+    status_msg = await update.message.reply_text("جاري التحميل... يرجى الانتظار ⏳") [cite: 1]
 
     if not os.path.exists("downloads"):
-        os.makedirs("downloads")
+        os.makedirs("downloads") [cite: 1]
 
     try:
         with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-            info = await asyncio.to_thread(ydl.extract_info, url, download=True)
-            file_path = ydl.prepare_filename(info)
+            info = await asyncio.to_thread(ydl.extract_info, url, download=True) [cite: 1]
+            file_path = ydl.prepare_filename(info) [cite: 1]
 
         with open(file_path, "rb") as video:
             await update.message.reply_video(
                 video=video, 
                 caption=f"✅ **تم التحميل بنجاح!**\n\n📌: {info.get('title', 'فيديو')}",
                 parse_mode="Markdown"
-            )
+            ) [cite: 1]
         
         if os.path.exists(file_path):
-            os.remove(file_path)
-        await status_msg.delete()
+            os.remove(file_path) [cite: 1]
+        await status_msg.delete() [cite: 1]
 
     except Exception as e:
-        await status_msg.edit_text(f"❌ **حدث خطأ:**\n`{str(e)[:100]}`", parse_mode="Markdown")
+        await status_msg.edit_text(f"❌ **حدث خطأ:**\n`{str(e)[:100]}`", parse_mode="Markdown") [cite: 1]
 
 if __name__ == "__main__":
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = ApplicationBuilder().token(TOKEN).build() [cite: 1]
     
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_video))
+    app.add_handler(CommandHandler("start", start)) [cite: 1]
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_video)) [cite: 1]
     
-    print("Bot is running with Developer @epr_a context...")
-    app.run_polling()
+    print("Bot is running. Developer: @epr_a")
+    app.run_polling() [cite: 1]
