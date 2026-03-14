@@ -4,10 +4,10 @@ import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes, CommandHandler
 
-# ملاحظة: استبدل هذا التوكن بالجديد إذا قمت بعمل Revoke
+# التوكن الخاص بك
 TOKEN = "8644900793:AAFyCWtc3QUp2wSW5oNQMYk2d7wOlqXGKFY"
 
-# إعدادات متقدمة للمحرك yt-dlp لضمان جودة عالية ودعم كافة المواقع
+# إعدادات متقدمة لتجاوز حظر إنستغرام والمنصات الأخرى
 YDL_OPTIONS = {
     "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
     "outtmpl": "downloads/%(title).50s_%(id)s.%(ext)s",
@@ -15,33 +15,37 @@ YDL_OPTIONS = {
     "no_warnings": True,
     "nocheckcertificate": True,
     "merge_output_format": "mp4",
+    "http_headers": {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.google.com/",
+    },
+    "geo_bypass": True,
 }
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
-        "👋 **أهلاً بك في بوت تحميل الوسائط الشامل!**\n\n"
+        "👋 **أهلاً بك يا محمد في بوت تحميل الوسائط!**\n\n"
         "🚀 أرسل رابط الفيديو من (YouTube, TikTok, Instagram, X).\n"
-        "✅ البوت سيقوم بالتحميل وإرساله لك كملف فيديو مباشر."
+        "✅ البوت سيعالج الرابط ويرسل الفيديو فوراً."
     )
-    # رابط قناة التحديثات الخاص بك (اختياري)
-    keyboard = [[InlineKeyboardButton("قناة المطور 📢", url="https://t.me/YourChannel")]]
+    keyboard = [[InlineKeyboardButton("قناة التحديثات 📢", url="https://t.me/YourChannel")]]
     await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = update.message.text
-    # رسالة مؤقتة لتنبيه المستخدم
-    status_msg = await update.message.reply_text("جاري معالجة الرابط... يرجى الانتظار ⏳")
+    status_msg = await update.message.reply_text("جاري التحميل... يرجى الانتظار ⏳")
 
     if not os.path.exists("downloads"):
         os.makedirs("downloads")
 
     try:
         with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-            # استخراج المعلومات والتحميل (استخدام asyncio لعدم تجميد البوت)
+            # استخراج المعلومات والتحميل في خيط منفصل لتجنب تعليق البوت
             info = await asyncio.to_thread(ydl.extract_info, url, download=True)
             file_path = ydl.prepare_filename(info)
 
-        # إرسال الفيديو للمستخدم
         with open(file_path, "rb") as video:
             await update.message.reply_video(
                 video=video, 
@@ -49,21 +53,19 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode="Markdown"
             )
         
-        # تنظيف الخادم: حذف الملف بعد إرساله لتوفير المساحة
         if os.path.exists(file_path):
             os.remove(file_path)
             
         await status_msg.delete()
 
     except Exception as e:
-        # في حال حدوث خطأ، نقوم بتحديث رسالة الحالة بدلاً من إرسال رسالة جديدة
-        await status_msg.edit_text(f"❌ **عذراً، حدث خطأ أثناء التحميل:**\n`{str(e)[:100]}`", parse_mode="Markdown")
+        # التعامل مع الخطأ وتنبيه المستخدم
+        await status_msg.edit_text(f"❌ **حدث خطأ أثناء التحميل:**\n`{str(e)[:100]}`", parse_mode="Markdown")
 
 if __name__ == "__main__":
-    # تشغيل البوت
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_video))
     
-    print("Bot is starting... Press Ctrl+C to stop.")
+    print("Bot is running...")
     app.run_polling()
