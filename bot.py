@@ -7,7 +7,7 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 # التوكن الخاص بك
 TOKEN = "8644900793:AAE5CTvAJUz0YdO2HyRjVpID7XLf3ro_Uu8"
 
-# إعدادات المحرك لضمان جودة عالية وتجاوز الحظر
+# إعدادات التحميل وتجاوز القيود
 YDL_OPTIONS = {
     "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
     "outtmpl": "downloads/%(title).50s_%(id)s.%(ext)s",
@@ -20,9 +20,8 @@ YDL_OPTIONS = {
     },
 }
 
-# دالة الترحيب عند الضغط على /start (تم إزالة قناة التحديثات)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_name = update.effective_user.first_name [cite: 1]
+    user_name = update.effective_user.first_name
     
     welcome_text = (
         f"أهلاً بك يا {user_name}! ✨\n\n"
@@ -34,9 +33,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "وسأقوم بإرسال الفيديو لك مباشرة بجودة عالية."
     )
     
-    # الإبقاء فقط على زر المطور @epr_a
+    # زر المطور فقط كما طلبت
     keyboard = [
-        [InlineKeyboardButton("المطور 👨‍💻", url="https://t.me/epr_a")] [cite: 1]
+        [InlineKeyboardButton("المطور 👨‍💻", url="https://t.me/epr_a")]
     ]
     
     await update.message.reply_text(
@@ -46,36 +45,36 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    url = update.message.text [cite: 1]
-    status_msg = await update.message.reply_text("جاري التحميل... يرجى الانتظار ⏳") [cite: 1]
+    url = update.message.text
+    status_msg = await update.message.reply_text("جاري التحميل... يرجى الانتظار ⏳")
 
     if not os.path.exists("downloads"):
-        os.makedirs("downloads") [cite: 1]
+        os.makedirs("downloads")
 
     try:
         with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-            info = await asyncio.to_thread(ydl.extract_info, url, download=True) [cite: 1]
-            file_path = ydl.prepare_filename(info) [cite: 1]
+            info = await asyncio.to_thread(ydl.extract_info, url, download=True)
+            file_path = ydl.prepare_filename(info)
 
         with open(file_path, "rb") as video:
             await update.message.reply_video(
                 video=video, 
                 caption=f"✅ **تم التحميل بنجاح!**\n\n📌: {info.get('title', 'فيديو')}",
                 parse_mode="Markdown"
-            ) [cite: 1]
+            )
         
         if os.path.exists(file_path):
-            os.remove(file_path) [cite: 1]
-        await status_msg.delete() [cite: 1]
+            os.remove(file_path)
+        await status_msg.delete()
 
     except Exception as e:
-        await status_msg.edit_text(f"❌ **حدث خطأ:**\n`{str(e)[:100]}`", parse_mode="Markdown") [cite: 1]
+        await status_msg.edit_text(f"❌ **حدث خطأ:**\n`{str(e)[:100]}`", parse_mode="Markdown")
 
 if __name__ == "__main__":
-    app = ApplicationBuilder().token(TOKEN).build() [cite: 1]
+    app = ApplicationBuilder().token(TOKEN).build()
     
-    app.add_handler(CommandHandler("start", start)) [cite: 1]
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_video)) [cite: 1]
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_video))
     
-    print("Bot is running. Developer: @epr_a")
-    app.run_polling() [cite: 1]
+    print("Bot is starting...")
+    app.run_polling()
