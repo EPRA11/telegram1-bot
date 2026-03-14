@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes, CommandHandler
 
 # جلب التوكن من متغيرات البيئة في Railway
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("8644900793:AAHWmsD6ZdIWDYl8hi8uQS7wYJxxIrHVWOw")
 
 # دالة الترحيب عند إرسال أمر /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
